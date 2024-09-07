@@ -1,6 +1,6 @@
 import unittest
 from textnode import (TextNode,text_type_bold,text_type_code,text_type_image,text_type_italic,text_type_link,text_type_text)
-from parse_md import split_nodes_delimiter
+from parse_md import split_nodes_delimiter,extract_markdown_images,extract_markdown_links
 
 class TestParsing(unittest.TestCase):
     def test_code_parse(self):
@@ -71,6 +71,42 @@ class TestParsing(unittest.TestCase):
             ],
             new_nodes,
         )
+
+    def test_single_image(self):
+        text = "Here is an image ![alt text](https://example.com/image.png)"
+        expected = [("alt text", "https://example.com/image.png")]
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_multiple_images(self):
+        text = "![image1](https://example.com/1.png) and ![image2](https://example.com/2.png)"
+        expected = [("image1", "https://example.com/1.png"), ("image2", "https://example.com/2.png")]
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_no_images(self):
+        text = "This is text without images."
+        expected = []
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_no_alt_in_images(self):
+        text="![](https://www.boot.dev)"
+        expected=[('', 'https://www.boot.dev')]
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_single_link(self):
+        text = "Here is a [link](https://example.com)"
+        expected = [("link", "https://example.com")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_multiple_links(self):
+        text = "[link1](https://example.com/1) and [link2](https://example.com/2)"
+        expected = [("link1", "https://example.com/1"), ("link2", "https://example.com/2")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_no_links(self):
+        text = "This is text without links."
+        expected = []
+        self.assertEqual(extract_markdown_links(text), expected)
+    
            
 
 if __name__ == "__main__":
