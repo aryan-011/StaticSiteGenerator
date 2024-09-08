@@ -1,4 +1,4 @@
-from textnode import TextNode,text_type_text,text_type_bold,text_type_italic
+from textnode import TextNode,text_type_text,text_type_link,text_type_image
 import re
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     newNodes=[]
@@ -18,7 +18,52 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     newNodes.append(TextNode(value,text_type))
 
         return newNodes
-    
+
+
+def split_nodes_link(old_nodes):
+    link_pattern = r'\[(.*?)\]\((.*?)\)'
+
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text_type == text_type_text:
+            parts = re.split(link_pattern, node.text)
+
+            # print(parts)
+            for i in range(0, len(parts), 3):
+                if parts[i]:  
+                    new_nodes.append(TextNode(parts[i], text_type_text))
+
+                if i + 1 < len(parts):  # Link text
+                    new_nodes.append(TextNode(parts[i + 1], text_type_link, parts[i + 2]))
+                    
+        else:
+            new_nodes.append(node)
+
+    return new_nodes
+
+def split_nodes_images(old_nodes):
+    link_pattern = r'!\[(.*?)\]\((.*?)\)'
+
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text_type == text_type_text:
+            parts = re.split(link_pattern, node.text)
+
+            # print(parts)
+            for i in range(0, len(parts), 3):
+                if parts[i]:  
+                    new_nodes.append(TextNode(parts[i], text_type_text))
+
+                if i + 1 < len(parts):  # Link text
+                    new_nodes.append(TextNode(parts[i + 1], text_type_image, parts[i + 2]))
+                    
+        else:
+            new_nodes.append(node)
+
+    return new_nodes
+
 def extract_markdown_images(text):
     images=[]
     images = re.findall(r"!\[(.*?)\]\((.*?)\)",text)
@@ -29,10 +74,4 @@ def extract_markdown_links(text):
     links = re.findall(r"\[(.*?)\]\((.*?)\)",text)
     return links
 
-text = "This is text with a ![](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
-print(extract_markdown_images(text))
-# [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
 
-text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
-print(extract_markdown_links(text))
-# [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
