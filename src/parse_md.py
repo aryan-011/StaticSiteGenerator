@@ -1,4 +1,4 @@
-from textnode import TextNode,text_type_text,text_type_link,text_type_image
+from textnode import TextNode, text_type_text, text_type_bold, text_type_italic, text_type_code, text_type_image, text_type_link
 import re
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     newNodes=[]
@@ -17,7 +17,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 else :
                     newNodes.append(TextNode(value,text_type))
 
-        return newNodes
+    return newNodes
 
 
 def split_nodes_link(old_nodes):
@@ -74,4 +74,19 @@ def extract_markdown_links(text):
     links = re.findall(r"\[(.*?)\]\((.*?)\)",text)
     return links
 
+def text_to_textnodes(text):
+    # Start with the whole text as a single TextNode
+    nodes = [TextNode(text, text_type_text)]
+    
+    # Sequentially apply each splitting function
+    nodes = split_nodes_link(split_nodes_images(nodes))
+    nodes = split_nodes_delimiter(nodes, '**', text_type_bold)
+    nodes = split_nodes_delimiter(nodes, '*', text_type_italic)
+    nodes = split_nodes_delimiter(nodes, '`', text_type_code)
+
+    return nodes
+
+
+
+    
 

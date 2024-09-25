@@ -1,6 +1,6 @@
 import unittest
 from textnode import (TextNode,text_type_bold,text_type_code,text_type_image,text_type_italic,text_type_link,text_type_text)
-from parse_md import split_nodes_delimiter,extract_markdown_images,extract_markdown_links,split_nodes_images,split_nodes_link
+from parse_md import split_nodes_delimiter,extract_markdown_images,extract_markdown_links,split_nodes_images,split_nodes_link,text_to_textnodes
 
 class TestParsing(unittest.TestCase):
     def test_code_parse(self):
@@ -171,6 +171,30 @@ class TestParsing(unittest.TestCase):
         node = TextNode("This is text without links.", text_type_text)
         new_nodes = split_nodes_link([node])
         self.assertEqual(new_nodes, [node])
+
+    def test_mixed_content(self):
+        text=("**bold** and *italic* with `code` and an "
+            "![image](https://example.com/img.png) and"
+                        " a [link](https://example.com)")
+        new_nodes = text_to_textnodes(text)
+
+        expected_nodes = [
+            TextNode("bold", text_type_bold),
+            TextNode(" and ", text_type_text),
+            TextNode("italic", text_type_italic),
+            TextNode(" with ", text_type_text),
+            TextNode("code", text_type_code),
+            TextNode(" and an ", text_type_text),
+            TextNode("image", text_type_image, "https://example.com/img.png"),
+            TextNode(" and a ", text_type_text),
+            TextNode("link", text_type_link, "https://example.com"),
+        ]
+
+        for i, node in enumerate(new_nodes):
+            self.assertEqual(node.text, expected_nodes[i].text)
+            self.assertEqual(node.text_type, expected_nodes[i].text_type)
+            if node.text_type in [text_type_image, text_type_link]:
+                self.assertEqual(node.url, expected_nodes[i].url)
 
            
 
